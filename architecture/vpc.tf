@@ -6,7 +6,7 @@ resource "aws_vpc" "demo" {
   cidr_block = "10.50.0.0/16"
 
   tags = tomap({
-    "Name"  = "to22-dev",
+    "Name"                                      = "to22-dev",
     "kubernetes.io/cluster/${var.cluster-name}" = "shared",
   })
 }
@@ -19,9 +19,9 @@ resource "aws_subnet" "demo" {
   vpc_id            = aws_vpc.demo.id
 
   tags = tomap({
-    "Name"  = "to22-dev-${data.aws_availability_zones.available.names[count.index]}",
+    "Name"                                      = "to22-dev-${data.aws_availability_zones.available.names[count.index]}",
     "kubernetes.io/cluster/${var.cluster-name}" = "shared",
-    "Project" = "TO22"
+    "Project"                                   = "TO22"
   })
 }
 
@@ -29,7 +29,7 @@ resource "aws_internet_gateway" "demo" {
   vpc_id = aws_vpc.demo.id
 
   tags = tomap({
-    "Name" = "to22-dev",
+    "Name"    = "to22-dev",
     "Project" = "TO22"
   })
 }

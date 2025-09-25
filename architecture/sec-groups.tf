@@ -15,7 +15,7 @@ resource "aws_security_group" "demo-cluster" {
   }
 
   tags = tomap({
-    "Name" = "to22-cluster-sg",
+    "Name"    = "to22-cluster-sg",
     "Project" = "TO22"
   })
 }
@@ -50,9 +50,9 @@ resource "aws_security_group" "demo-node" {
   }
 
   tags = tomap({
-    "Name" = "to22-worker-sg",
-    "kubernetes.io/cluster/${var.cluster-name}"  = "owned",
-    "Project" = "TO22"
+    "Name"                                      = "to22-worker-sg",
+    "kubernetes.io/cluster/${var.cluster-name}" = "owned",
+    "Project"                                   = "TO22"
   })
 }
 

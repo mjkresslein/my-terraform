@@ -1,0 +1,7 @@
+---
+- name: Backup Dev Environment Resources
+  hosts: localhost
+  vars_files:
+    - group_vars/all.yml
+  roles:
+    - backup

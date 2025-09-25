@@ -17,12 +17,12 @@ USERDATA
 
 resource "aws_launch_configuration" "demo" {
   associate_public_ip_address = true
-  iam_instance_profile        = "arn:aws:iam::320588532383:instance-profile/to22-worker-node-role"  # "${aws_iam_instance_profile.demo-node.name}"
+  iam_instance_profile        = "arn:aws:iam::320588532383:instance-profile/to22-worker-node-role" # "${aws_iam_instance_profile.demo-node.name}"
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = "m4.large"
   name_prefix                 = "to22-"
-  security_groups             = ["sg-0655a904cefe27a16"]        # ["${aws_security_group.demo-node.id}"]
-  user_data_base64            = "${base64encode(local.demo-node-userdata)}"
+  security_groups             = ["sg-0655a904cefe27a16"] # ["${aws_security_group.demo-node.id}"]
+  user_data_base64            = base64encode(local.demo-node-userdata)
 
   lifecycle {
     create_before_destroy = true
@@ -35,7 +35,7 @@ resource "aws_autoscaling_group" "demo" {
   max_size             = 2
   min_size             = 1
   name                 = "to22-asg"
-  vpc_zone_identifier  = ["subnet-0916d4323df823b58", "subnet-0680293ee11203eae"]       # ["${aws_subnet.demo.*.id}"]
+  vpc_zone_identifier  = ["subnet-0916d4323df823b58", "subnet-0680293ee11203eae"] # ["${aws_subnet.demo.*.id}"]
 
   tag {
     key                 = "Name"

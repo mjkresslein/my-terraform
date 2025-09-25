@@ -1,0 +1,43 @@
+- name: RDS Snapshot Error Handling
+  block:
+    - name: Create DB instance snapshots
+      amazon.aws.rds_instance_snapshot:
+        db_instance_identifier: "{{ item }}"
+        db_snapshot_identifier: "{{ ops_user }}-ansible-{{ item }}"
+        wait: true
+        wait_timeout: 0
+      with_items: "{{ rds_ids }}"
+      register: snapshot_results
+
+    - name: Gather DB Snapshot Identifiers
+      ansible.builtin.set_fact:
+        snapshot_ids: "{{ snapshot_ids | default([]) + [item.db_snapshot_identifier] }}"
+      with_items: "{{ snapshot_results.results }}"
+      no_log: true
+
+    - name: Print DB Snapshot Identifiers
+      ansible.builtin.debug:
+        msg: "Created Snapshot (ID): {{ item }}"
+      with_items: "{{ snapshot_ids }}"
+
+    # - name: Share DB Snapshots to New Account/Org
+    #   command: >
+    #     aws rds modify-db-snapshot-attribute
+    #     --db-snapshot-identifier {{ item }}
+    #     --attribute-name restore
+    #     --values-to-add 123456789012  # New ORG ACCOUNT
+    #   with_items: "{{ snapshot_ids }}"
+
+  rescue:
+    - name: ERROR MESSAGE
+      ansible.builtin.debug:
+        msg: "No snapshot IDs were gathered. Either they were not created or something went wrong."
+
+  always:
+    - name: Delete DB instance snapshots
+      amazon.aws.rds_instance_snapshot:
+        db_snapshot_identifier: "{{ item.db_snapshot_identifier }}"
+        state: absent
+        wait: true
+      with_items: "{{ snapshot_results.results }}"
+      when: snapshot_results.db_snapshot_identifier is defined

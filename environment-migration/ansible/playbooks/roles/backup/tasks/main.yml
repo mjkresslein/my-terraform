@@ -1,0 +1,5 @@
+- name: Include EC2 Backup Tasks
+  ansible.builtin.include_tasks: backup_ec2s.yml
+
+- name: Include RDS Backup Tasks
+  ansible.builtin.include_tasks: backup_rds.yml

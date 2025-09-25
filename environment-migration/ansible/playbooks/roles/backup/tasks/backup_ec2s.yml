@@ -1,0 +1,51 @@
+- name: AMI Creation Error Handling
+  block:
+    - name: Create AMIs from the DEV EC2s
+      amazon.aws.ec2_ami:
+        instance_id: "{{ item }}"
+        name: "ansible-backup-{{ item }}"
+        no_reboot: true
+        tags:
+          Name: "ansible-backup-{{ item }}"
+          CreatedBy: "{{ ops_user }}"
+          CreatedWith: "ansible-playbook"
+          Retain: "1month"
+        wait: true
+        wait_timeout: 0
+      with_items: "{{ instance_ids }}"
+      register: ami_results
+
+    - name: Gather AMI IDs
+      ansible.builtin.set_fact:
+        ami_ids: "{{ ami_ids | default([]) + [item.image_id] }}"
+      with_items: "{{ ami_results.results }}"
+      no_log: true
+
+    - name: Print AMI IDs
+      ansible.builtin.debug:
+        msg: "Created the AMI (ID): {{ item }}"
+      with_items: "{{ ami_ids }}"
+
+    # - name: Share AMIs Across Orgs
+    #   amazon.aws.ec2_ami:
+    #     image_id: "{{ item.image_id }}"
+    #     state: present
+    #     launch_permissions:
+    #       org_arns: ['']
+    #       org_unit_arns: ['']
+    #   with_items: {{ ami_results.results }}
+
+  rescue:
+    - name: ERROR MESSAGE
+      ansible.builtin.debug:
+        msg: "No AMI IDs were gathered. Either they were not created or something went wrong."
+
+  always:
+    - name: Cleanup AMis and Snapshots
+      amazon.aws.ec2_ami:
+        image_id: "{{ item.image_id }}"
+        delete_snapshot: true
+        state: absent
+        wait: true
+      with_items: "{{ ami_results.results }}"
+      when: ami_results.image_id is defined
